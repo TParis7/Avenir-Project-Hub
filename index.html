@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>P3 & Avenir Project Hub</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --p3-crimson: #D93A3A;
+    --p3-maroon: #4A1A2E;
+    --p3-dark: #1A0A14;
+    --p3-bg: #F5F3F0;
+    --p3-card: #FFFFFF;
+    --p3-border: rgba(0,0,0,0.06);
+    --p3-text: #2D2226;
+    --p3-text-muted: #6B5F65;
+    --p3-mid-gray: #9A928A;
+    --p3-light-gray: #E8E4E0;
+    --radius-card: 14px;
+    --radius-lg: 16px;
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+    --shadow-hover: 0 8px 28px rgba(74,26,46,0.14), 0 2px 8px rgba(26,10,20,0.08);
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Phase accent colors */
+    --phase-1: #7C3AED;
+    --phase-2: #2563EB;
+    --phase-3: #D93A3A;
+    --phase-4: #16A34A;
+    --phase-admin: #D97706;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--p3-bg);
+    color: var(--p3-text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+
+  /* ── Header (Data Matrix style) ── */
+  .header {
+    background: var(--p3-dark);
+    color: white; border-radius: 16px; padding: 28px 32px; margin-bottom: 8px;
+    position: relative; overflow: hidden;
+  }
+  .header::before {
+    content: ''; position: absolute; top: 0; right: 0;
+    width: 55%; height: 100%;
+    background: linear-gradient(135deg, transparent 0%, var(--p3-maroon) 30%, var(--p3-crimson) 100%);
+    clip-path: polygon(30% 0, 100% 0, 100% 100%, 0% 100%);
+  }
+  .header::after {
+    content: ''; position: absolute; top: 0; right: 25%;
+    width: 20%; height: 100%;
+    background: linear-gradient(180deg, rgba(217,58,58,0.3) 0%, rgba(107,29,29,0.5) 100%);
+    clip-path: polygon(50% 0, 100% 0, 50% 100%, 0% 100%);
+  }
+  .header-row { display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 1; gap: 16px; }
+  .header-left { display: flex; align-items: center; gap: 18px; }
+  .header-logo { height: 48px; opacity: 1; }
+  .header-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.2); }
+  .header-text h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.2; }
+  .header-text .subtitle { font-size: 13px; opacity: 0.7; margin-top: 2px; }
+  .date-badge {
+    background: rgba(255,255,255,0.12); backdrop-filter: blur(4px);
+    padding: 10px 18px; border-radius: 10px; font-size: 13px;
+    text-align: right; border: 1px solid rgba(255,255,255,0.08); white-space: nowrap;
+  }
+  .date-badge strong { display: block; font-size: 15px; }
+
+  /* ── Section Titles ── */
+  .section-title {
+    font-size: 15px; font-weight: 700; color: var(--p3-maroon);
+    margin: 32px 0 14px; padding-bottom: 6px;
+    border-bottom: 2px solid var(--p3-crimson); display: inline-block;
+    letter-spacing: -0.2px;
+  }
+
+  /* ═══ CALENDAR ═══ */
+  .cal-wrap {
+    background: var(--p3-card); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card); border: 1px solid var(--p3-border);
+    padding: 22px; margin-bottom: 8px;
+  }
+  .cal-months { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+
+  .cal-month h3 {
+    font-size: 13px; font-weight: 700; color: var(--p3-maroon);
+    text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;
+    padding-bottom: 8px; border-bottom: 2px solid var(--p3-light-gray);
+    text-align: center;
+  }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .cal-dow {
+    text-align: center; font-size: 10px; font-weight: 700;
+    color: var(--p3-mid-gray); text-transform: uppercase;
+    padding: 4px 0 2px;
+  }
+  .cal-day {
+    aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+    border-radius: 6px; font-size: 12px; font-weight: 500; color: var(--p3-text);
+    position: relative;
+  }
+  .cal-day.muted { color: transparent; }
+  .cal-day.weekend { background: #EFEDE9; color: var(--p3-mid-gray); }
+  .cal-day.today {
+    background: var(--p3-dark); color: var(--p3-white);
+    box-shadow: 0 0 0 2px var(--p3-crimson);
+    font-weight: 700; color: #fff;
+  }
+  .cal-day.meeting {
+    background: linear-gradient(135deg, var(--p3-maroon), var(--p3-crimson));
+    color: #fff; font-weight: 700;
+  }
+  .cal-day.meeting .mnum {
+    position: absolute; top: 1px; right: 3px;
+    font-size: 8px; font-weight: 800; color: rgba(255,255,255,0.9);
+  }
+  .cal-day.p1 { background: rgba(124,58,237,0.14); color: var(--phase-1); font-weight: 600; }
+  .cal-day.p2 { background: rgba(37,99,235,0.14); color: var(--phase-2); font-weight: 600; }
+  .cal-day.p3 { background: rgba(217,58,58,0.14); color: var(--phase-3); font-weight: 600; }
+  .cal-day.p4 { background: rgba(22,163,74,0.14); color: var(--phase-4); font-weight: 600; }
+  .cal-day.invoice {
+    background: var(--phase-admin); color: #fff; font-weight: 700;
+    box-shadow: 0 0 0 2px #92400E;
+  }
+  .cal-day.invoice::after {
+    content: '$'; position: absolute; top: 0; right: 3px;
+    font-size: 9px; font-weight: 800; color: #fff;
+  }
+
+  /* Pitch/Practice session week highlight — dashed border ring on top/bottom */
+  .cal-day.session-practice {
+    box-shadow: inset 0 2px 0 0 var(--phase-2), inset 0 -2px 0 0 var(--phase-2);
+  }
+  .cal-day.session-pitch {
+    box-shadow: inset 0 2px 0 0 var(--phase-3), inset 0 -2px 0 0 var(--phase-3);
+  }
+
+  .cal-legend {
+    display: flex; flex-wrap: wrap; gap: 10px 20px;
+    padding: 14px 4px 0; margin-top: 14px;
+    border-top: 1px solid var(--p3-light-gray);
+    font-size: 12px; color: var(--p3-text-muted);
+  }
+  .cal-legend-item { display: flex; align-items: center; gap: 7px; }
+  .cal-legend-swatch { width: 13px; height: 13px; border-radius: 4px; flex-shrink: 0; }
+
+  /* ═══ KNOWLEDGE BASE GRID ═══ */
+  .kb-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px;
+  }
+  .kb-card {
+    background: var(--p3-card); border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card); overflow: hidden;
+    border: 1px solid var(--p3-border);
+    text-decoration: none; color: inherit;
+    display: flex; flex-direction: column;
+    transition: box-shadow var(--transition), transform var(--transition);
+    position: relative;
+  }
+  .kb-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-3px); }
+  .kb-card:hover .kb-arrow { opacity: 1; transform: translateX(0); }
+
+  .kb-thumb {
+    position: relative; width: 100%; padding-top: 46%; overflow: hidden;
+  }
+  .kb-icon {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .kb-icon svg { width: 38px; height: 38px; color: #fff; opacity: 0.92; }
+
+  /* Gradient variants */
+  .kb-thumb.grad-primary { background: linear-gradient(135deg, var(--p3-dark) 0%, var(--p3-maroon) 55%, var(--p3-crimson) 100%); }
+  .kb-thumb.grad-blue    { background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%); }
+  .kb-thumb.grad-green   { background: linear-gradient(135deg, #14532D 0%, #16A34A 100%); }
+  .kb-thumb.grad-purple  { background: linear-gradient(135deg, #4C1D95 0%, #7C3AED 100%); }
+  .kb-thumb.grad-amber   { background: linear-gradient(135deg, #92400E 0%, #F59E0B 100%); }
+  .kb-thumb.grad-teal    { background: linear-gradient(135deg, #134E4A 0%, #0D9488 100%); }
+  .kb-thumb.grad-slate   { background: linear-gradient(135deg, #334155 0%, #64748B 100%); }
+
+  .kb-body { padding: 14px 16px 16px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .kb-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--p3-crimson); margin-bottom: 2px;
+  }
+  .kb-tag.blue   { color: #2563EB; }
+  .kb-tag.green  { color: #16A34A; }
+  .kb-tag.purple { color: #7C3AED; }
+  .kb-tag.amber  { color: #D97706; }
+  .kb-tag.teal   { color: #0D9488; }
+  .kb-tag.slate  { color: #475569; }
+  .kb-tag-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  .kb-title {
+    font-size: 15.5px; font-weight: 650; color: var(--p3-text);
+    line-height: 1.3; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  }
+  .kb-arrow {
+    opacity: 0; transform: translateX(-4px);
+    transition: opacity var(--transition), transform var(--transition);
+    color: var(--p3-crimson); flex-shrink: 0;
+  }
+  .kb-desc { font-size: 12.5px; color: var(--p3-text-muted); line-height: 1.45; margin-top: 2px; }
+
+  .kb-card.disabled { pointer-events: none; opacity: 0.75; }
+  .kb-card.disabled .kb-thumb { filter: grayscale(0.3); }
+
+  /* ═══ MEETINGS ═══ */
+  .meetings {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+  }
+  .meeting-card {
+    background: var(--p3-card); border-radius: var(--radius-card);
+    padding: 16px 18px; box-shadow: var(--shadow-card);
+    border: 1px solid var(--p3-border); border-left: 4px solid var(--p3-crimson);
+    transition: box-shadow var(--transition), transform var(--transition);
+  }
+  .meeting-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+  .meeting-card.p1 { border-left-color: var(--phase-1); }
+  .meeting-card.p2 { border-left-color: var(--phase-2); }
+  .meeting-card.p3 { border-left-color: var(--phase-3); }
+  .meeting-card.p4 { border-left-color: var(--phase-4); }
+
+  .meeting-head {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;
+    margin-bottom: 8px;
+  }
+  .meeting-num {
+    font-size: 10.5px; font-weight: 800; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--p3-mid-gray);
+  }
+  .meeting-phase {
+    font-size: 9.5px; font-weight: 700; padding: 3px 7px; border-radius: 100px;
+    letter-spacing: 0.6px; text-transform: uppercase; white-space: nowrap;
+  }
+  .meeting-phase.p1 { background: rgba(124,58,237,0.12); color: var(--phase-1); }
+  .meeting-phase.p2 { background: rgba(37,99,235,0.12); color: var(--phase-2); }
+  .meeting-phase.p3 { background: rgba(217,58,58,0.12); color: var(--phase-3); }
+  .meeting-phase.p4 { background: rgba(22,163,74,0.12); color: var(--phase-4); }
+  .meeting-phase.mix {
+    background: linear-gradient(90deg, rgba(37,99,235,0.12), rgba(217,58,58,0.12));
+    color: var(--phase-3);
+  }
+  .meeting-date {
+    font-size: 17px; font-weight: 700; color: var(--p3-text); line-height: 1.2;
+  }
+  .meeting-date small {
+    display: block; font-size: 11.5px; font-weight: 500;
+    color: var(--p3-text-muted); margin-top: 3px;
+  }
+  .meeting-focus { font-size: 12.5px; color: var(--p3-text); line-height: 1.5; margin-top: 8px; }
+  .meeting-deliv {
+    font-size: 11.5px; color: var(--p3-text-muted); line-height: 1.45;
+    margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--p3-light-gray);
+  }
+  .meeting-deliv strong { color: var(--p3-text); font-weight: 650; }
+
+  /* ═══ PHASES ═══ */
+  .phases {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .phase {
+    background: var(--p3-card); border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card); overflow: hidden;
+    border: 1px solid var(--p3-border);
+  }
+  .phase-head { padding: 16px 18px; color: #fff; }
+  .phase.p1 .phase-head { background: linear-gradient(135deg, #5B21B6, var(--phase-1)); }
+  .phase.p2 .phase-head { background: linear-gradient(135deg, #1E40AF, var(--phase-2)); }
+  .phase.p3 .phase-head { background: linear-gradient(135deg, var(--p3-maroon), var(--phase-3)); }
+  .phase.p4 .phase-head { background: linear-gradient(135deg, #14532D, var(--phase-4)); }
+  .phase-num { font-size: 10px; font-weight: 800; letter-spacing: 2px; opacity: 0.8; }
+  .phase-name { font-size: 20px; font-weight: 700; letter-spacing: 0.5px; margin-top: 2px; }
+  .phase-window { font-size: 11.5px; opacity: 0.85; margin-top: 3px; }
+  .phase-body { padding: 14px 18px 16px; }
+  .phase-body p { font-size: 12.5px; color: var(--p3-text-muted); line-height: 1.55; margin-bottom: 6px; }
+  .phase-body p strong { color: var(--p3-text); font-weight: 650; }
+  .phase-body h4 {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--p3-mid-gray); margin: 12px 0 4px;
+  }
+  .phase-body ul { list-style: none; padding: 0; margin: 0; }
+  .phase-body li {
+    font-size: 12px; color: var(--p3-text); padding: 4px 0 4px 16px;
+    position: relative; line-height: 1.45;
+  }
+  .phase-body li::before {
+    content: ''; position: absolute; left: 2px; top: 10px;
+    width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: 0.4;
+  }
+
+  /* ═══ AGENDA ═══ */
+  .agenda {
+    background: var(--p3-card); border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card); border: 1px solid var(--p3-border);
+    padding: 20px 22px;
+  }
+  .agenda-intro { font-size: 12.5px; color: var(--p3-text-muted); line-height: 1.55; margin-bottom: 12px; }
+  .agenda-list { display: flex; flex-direction: column; }
+  .agenda-row {
+    display: grid; grid-template-columns: 150px 1fr; gap: 16px;
+    padding: 10px 0; border-bottom: 1px solid var(--p3-light-gray);
+  }
+  .agenda-row:last-child { border-bottom: none; }
+  .agenda-row .label { font-size: 12.5px; font-weight: 700; color: var(--p3-maroon); }
+  .agenda-row .note { font-size: 12.5px; color: var(--p3-text-muted); line-height: 1.5; }
+
+  /* ═══ FOOTER ═══ */
+  .footer { text-align: center; padding: 24px 12px 12px; }
+  .footer-text { font-size: 11.5px; color: var(--p3-mid-gray); }
+  .footer-text a { color: var(--p3-crimson); text-decoration: none; font-weight: 500; }
+  .footer-text a:hover { text-decoration: underline; }
+
+  /* ═══ RESPONSIVE ═══ */
+  @media (max-width: 900px) {
+    .cal-months { grid-template-columns: 1fr; gap: 20px; }
+  }
+
+  @media (max-width: 768px) {
+    .container { padding: 14px; }
+    .header { padding: 18px 18px; border-radius: 12px; }
+    .header::before, .header::after { opacity: 0.9; }
+    .header-row { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .header-left { flex-wrap: wrap; gap: 12px; width: 100%; }
+    .header-logo { height: 34px; }
+    .header-divider { display: none; }
+    .header-text h1 { font-size: 18px; }
+    .header-text .subtitle { font-size: 12px; }
+    .date-badge { align-self: flex-start; font-size: 12px; padding: 8px 14px; }
+    .section-title { font-size: 13px; margin: 24px 0 10px; }
+    .cal-wrap { padding: 14px; border-radius: 12px; }
+    .cal-month h3 { font-size: 12px; }
+    .cal-day { font-size: 11px; }
+    .cal-day.meeting .mnum { font-size: 7px; }
+    .cal-dow { font-size: 9px; }
+    .cal-legend { font-size: 11px; gap: 8px 14px; }
+    .kb-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .kb-card { border-radius: 12px; }
+    .kb-thumb { padding-top: 42%; }
+    .kb-icon svg { width: 30px; height: 30px; }
+    .kb-body { padding: 10px 12px 12px; gap: 3px; }
+    .kb-tag { font-size: 9px; letter-spacing: 0.8px; }
+    .kb-tag-dot { width: 5px; height: 5px; }
+    .kb-title { font-size: 13.5px; }
+    .kb-desc { font-size: 11.5px; line-height: 1.4; }
+    .meetings { grid-template-columns: 1fr; gap: 10px; }
+    .meeting-card { padding: 14px 16px; border-radius: 12px; }
+    .meeting-date { font-size: 16px; }
+    .phases { grid-template-columns: 1fr; gap: 12px; }
+    .phase { border-radius: 12px; }
+    .phase-name { font-size: 18px; }
+    .agenda { padding: 16px; border-radius: 12px; }
+    .agenda-row { grid-template-columns: 1fr; gap: 2px; padding: 8px 0; }
+    .agenda-row .label { font-size: 12px; }
+    .agenda-row .note { font-size: 12px; }
+  }
+
+  @media (max-width: 420px) {
+    .kb-grid { grid-template-columns: 1fr; }
+    .cal-day { font-size: 10.5px; }
+    .cal-day.meeting .mnum { top: 1px; right: 2px; font-size: 6.5px; }
+  }
+
+  /* Touch feedback */
+  @media (hover: none) and (pointer: coarse) {
+    .kb-card:active, .meeting-card:active { transform: scale(0.98); }
+    .kb-arrow { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ── HEADER (Data Matrix style) ── -->
+  <div class="header">
+    <div class="header-row">
+      <div class="header-left">
+        <img src="p3-logo-horizontal.png" alt="P3 logo" class="header-logo">
+        <div class="header-divider"></div>
+        <div class="header-text">
+          <h1>P3 &amp; Avenir Project Hub</h1>
+          <div class="subtitle">50-Day Go-to-Market Pitch Refinement · Apr 13 – May 31, 2026</div>
+        </div>
+      </div>
+      <div class="date-badge">
+        <strong>Wed · Apr 15</strong>
+        3:00 PM CT · Kickoff
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CALENDAR ── -->
+  <div class="section-title">Project Calendar</div>
+  <div class="cal-wrap">
+    <div class="cal-months">
+      <div class="cal-month">
+        <h3>April 2026</h3>
+        <div class="cal-grid" id="cal-apr"></div>
+      </div>
+      <div class="cal-month">
+        <h3>May 2026</h3>
+        <div class="cal-grid" id="cal-may"></div>
+      </div>
+      <div class="cal-month">
+        <h3>June 2026</h3>
+        <div class="cal-grid" id="cal-jun"></div>
+      </div>
+    </div>
+    <div class="cal-legend">
+      <div class="cal-legend-item"><div class="cal-legend-swatch" style="background:linear-gradient(135deg,var(--p3-maroon),var(--p3-crimson));"></div>Weekly Meeting</div>
+      <div class="cal-legend-item"><div class="cal-legend-swatch" style="background:#fff;box-shadow:inset 0 2px 0 0 var(--phase-2), inset 0 -2px 0 0 var(--phase-2);border:1px solid var(--p3-light-gray);"></div>Practice Week</div>
+      <div class="cal-legend-item"><div class="cal-legend-swatch" style="background:#fff;box-shadow:inset 0 2px 0 0 var(--phase-3), inset 0 -2px 0 0 var(--phase-3);border:1px solid var(--p3-light-gray);"></div>Pitch Week</div>
+      <div class="cal-legend-item"><div class="cal-legend-swatch" style="background:var(--phase-admin);box-shadow:0 0 0 2px #92400E;"></div>Invoice</div>
+    </div>
+  </div>
+
+  <!-- ── KNOWLEDGE BASE (moved to bottom) ── -->
+  
+
+  <!-- ── WEEKLY MEETINGS ── -->
+  <div class="section-title">Weekly Meetings</div>
+  <div class="meetings">
+
+    <div class="meeting-card p1">
+      <div class="meeting-head"><div class="meeting-num">Meeting 1</div><div class="meeting-phase p1">Polish</div></div>
+      <div class="meeting-date">Wed, Apr 15 <small>3:00 PM CT · Kickoff</small></div>
+      <div class="meeting-focus">2H kickoff · GTM review · audience segments · value props by buyer type · objection map.</div>
+      <div class="meeting-deliv"><strong>P3:</strong> Share pitch deck, one-pager, RevGen Strategy, investor deck draft, founder story.</div>
+    </div>
+
+    <div class="meeting-card p1">
+      <div class="meeting-head"><div class="meeting-num">Meeting 2</div><div class="meeting-phase p1">Polish</div></div>
+      <div class="meeting-date">Wed, Apr 22 <small>3:00 PM CT</small></div>
+      <div class="meeting-focus">Pitch iteration v1 · donor vs. investor tracks · review Richard's 10-org list.</div>
+      <div class="meeting-deliv"><strong>Richard:</strong> 3-participant expert feedback session held. <strong>P3:</strong> Revised narrative.</div>
+    </div>
+
+    <div class="meeting-card p2">
+      <div class="meeting-head"><div class="meeting-num">Meeting 3</div><div class="meeting-phase p2">Practice</div></div>
+      <div class="meeting-date">Wed, Apr 29 <small>3:00 PM CT</small></div>
+      <div class="meeting-focus">Prep for practice pitch #1 · coaching on delivery, framing, objection handling.</div>
+      <div class="meeting-deliv"><strong>Invoice 1 ($2,500) due Apr 30.</strong> Richard confirms 4+ donor/investor participants.</div>
+    </div>
+
+    <div class="meeting-card p2">
+      <div class="meeting-head"><div class="meeting-num">Meeting 4</div><div class="meeting-phase p2">Practice</div></div>
+      <div class="meeting-date">Wed, May 6 <small>3:00 PM CT</small></div>
+      <div class="meeting-focus">Debrief practice pitch #1 · iterate on feedback · prep practice pitch #2.</div>
+      <div class="meeting-deliv"><strong>Richard:</strong> Structured feedback shared. <strong>P3:</strong> Update pitch v2.</div>
+    </div>
+
+    <div class="meeting-card p3">
+      <div class="meeting-head"><div class="meeting-num">Meeting 5</div><div class="meeting-phase mix">Practice → Pitch</div></div>
+      <div class="meeting-date">Wed, May 13 <small>3:00 PM CT</small></div>
+      <div class="meeting-focus">Debrief practice #2 · finalize pitch v3 · confirm 3 live-pitch prospects · Rich sets meetings.</div>
+      <div class="meeting-deliv"><strong>Richard:</strong> 3 qualified live prospects identified and outreach initiated.</div>
+    </div>
+
+    <div class="meeting-card p3">
+      <div class="meeting-head"><div class="meeting-num">Meeting 6</div><div class="meeting-phase p3">Pitch</div></div>
+      <div class="meeting-date">Wed, May 20 <small>3:00 PM CT</small></div>
+      <div class="meeting-focus">Live pitch prep · dry-run · confirm materials, leave-behinds, follow-up sequence.</div>
+      <div class="meeting-deliv"><strong>P3:</strong> Final deck, one-pager, follow-up email template ready.</div>
+    </div>
+
+    <div class="meeting-card p3">
+      <div class="meeting-head"><div class="meeting-num">Meeting 7</div><div class="meeting-phase mix">Pitch → Assess</div></div>
+      <div class="meeting-date">Wed, May 27 <small>3:00 PM CT</small></div>
+      <div class="meeting-focus">Debrief live pitches to date · follow-up plan · begin end-of-engagement summary.</div>
+      <div class="meeting-deliv"><strong>Richard:</strong> Pitch notes + prospect status. <strong>P3:</strong> Follow-up actions logged.</div>
+    </div>
+
+    <div class="meeting-card p4">
+      <div class="meeting-head"><div class="meeting-num">Meeting 8 · Wrap</div><div class="meeting-phase p4">Assess</div></div>
+      <div class="meeting-date">Wed, Jun 3 <small>3:00 PM CT</small></div>
+      <div class="meeting-focus">Final engagement review · 90-day roadshow & roadmap plan · extension discussion.</div>
+      <div class="meeting-deliv"><strong>Invoice 2 ($2,500) due May 31.</strong> Richard: End-of-project summary delivered.</div>
+    </div>
+
+  </div>
+
+  <!-- ── PHASES ── -->
+  <div class="section-title">Phases & Deliverables</div>
+  <div class="phases">
+
+    <div class="phase p1">
+      <div class="phase-head">
+        <div class="phase-num">Phase 1</div>
+        <div class="phase-name">POLISH</div>
+        <div class="phase-window">Apr 13 – Apr 26 · Weeks 1–2</div>
+      </div>
+      <div class="phase-body">
+        <p><strong>Objective.</strong> Refine core positioning, narrative and GTM messaging to clearly articulate value to partners and funders.</p>
+        <h4>Key Deliverables</h4>
+        <ul>
+          <li>Pitch v1 draft — donor + investor variants (Apr 22)</li>
+          <li>Objection map covering ≥10 objections</li>
+          <li>Expert feedback session with ≥3 reviewers</li>
+          <li>Curated 10-org target list with pursuit rationale</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase p2">
+      <div class="phase-head">
+        <div class="phase-num">Phase 2</div>
+        <div class="phase-name">PRACTICE</div>
+        <div class="phase-window">Apr 27 – May 10 · Weeks 3–4</div>
+      </div>
+      <div class="phase-body">
+        <p><strong>Objective.</strong> Pressure-test pitch with a friendly but credible audience to improve clarity, flow, and donor/investor resonance.</p>
+        <h4>Key Deliverables</h4>
+        <ul>
+          <li>2 virtual practice pitches, ≥4 participants each</li>
+          <li>Feedback Log entries for every participant</li>
+          <li>Pitch v3 finalized by May 13</li>
+          <li>Stretch: ≥1 participant → warm intro for Phase 3</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase p3">
+      <div class="phase-head">
+        <div class="phase-num">Phase 3</div>
+        <div class="phase-name">PITCH</div>
+        <div class="phase-window">May 4 – May 24 · Weeks 4–6</div>
+      </div>
+      <div class="phase-body">
+        <p><strong>Objective.</strong> Take refined pitch into the market and initiate real conversations with qualified partners, donors, and investors.</p>
+        <h4>Key Deliverables</h4>
+        <ul>
+          <li>≥3 live pitches to qualified, named prospects</li>
+          <li>All pitches logged in Feedback Log + Partnership Matrix</li>
+          <li>Written follow-up within 48 hours per pitch</li>
+          <li>≥1 prospect → defined next step (LOI / pilot / grant)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase p4">
+      <div class="phase-head">
+        <div class="phase-num">Phase 4</div>
+        <div class="phase-name">ASSESS</div>
+        <div class="phase-window">Late May – End of June</div>
+      </div>
+      <div class="phase-body">
+        <p><strong>Objective.</strong> Capture learnings and hand P3 a forward plan with a validated path to revenue and capital development.</p>
+        <h4>Key Deliverables</h4>
+        <ul>
+          <li>Written end-of-engagement summary</li>
+          <li>90-day roadshow & roadmap plan</li>
+          <li>Extension decision (yes / no / defer)</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+<!--KB_START-->
+  <div class="section-title">Knowledge Base</div>
+  <div class="kb-grid">
+
+    <!-- Master Doc (highlighted as primary) -->
+    <a class="kb-card" href="https://docs.google.com/document/d/1sx4ZcXspklWNbH1SzNHtk2u9HtsODsG8eeO274Kz6Qo/edit" target="_blank" rel="noopener">
+      <div class="kb-thumb grad-primary">
+        <div class="kb-icon">
+          <!-- Clipboard / master doc icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="3" width="14" height="18" rx="2"/>
+            <rect x="9" y="2" width="6" height="4" rx="1" fill="currentColor" opacity="0.3"/>
+            <line x1="9" y1="11" x2="15" y2="11"/>
+            <line x1="9" y1="14" x2="15" y2="14"/>
+            <line x1="9" y1="17" x2="13" y2="17"/>
+          </svg>
+        </div>
+      </div>
+      <div class="kb-body">
+        <div class="kb-tag"><span class="kb-tag-dot"></span>Master Doc</div>
+        <div class="kb-title">Project Coordination
+          <svg class="kb-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+        </div>
+        <div class="kb-desc">Living Google Doc — schedule, agenda, deliverables, contacts, actions.</div>
+      </div>
+    </a>
+
+    <!-- Investor Folder -->
+    <a class="kb-card" href="https://drive.google.com/drive/folders/1b65thgP6BTWsJI6IlquplgIiFa2nLPgS?usp=drive_link" target="_blank" rel="noopener">
+      <div class="kb-thumb grad-purple">
+        <div class="kb-icon">
+          <!-- Folder with briefcase overlay -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <rect x="9" y="11" width="6" height="5" rx="0.5" fill="currentColor" opacity="0.3"/>
+            <path d="M10.5 11v-1a1.5 1.5 0 0 1 3 0v1"/>
+          </svg>
+        </div>
+      </div>
+      <div class="kb-body">
+        <div class="kb-tag purple"><span class="kb-tag-dot"></span>Decks</div>
+        <div class="kb-title">Investor Folder
+          <svg class="kb-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+        </div>
+        <div class="kb-desc">Pitch deck, one-pager, and supporting investor collateral.</div>
+      </div>
+    </a>
+
+    <!-- Website -->
+    <a class="kb-card" href="https://www.pulseofp3.org" target="_blank" rel="noopener">
+      <div class="kb-thumb grad-blue">
+        <div class="kb-icon">
+          <!-- Globe -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/>
+          </svg>
+        </div>
+      </div>
+      <div class="kb-body">
+        <div class="kb-tag blue"><span class="kb-tag-dot"></span>Website</div>
+        <div class="kb-title">pulseofp3.org
+          <svg class="kb-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+        </div>
+        <div class="kb-desc">Updated homepage and new B2B / Partners section.</div>
+      </div>
+    </a>
+
+    <!-- RevGen Strategy -->
+    <a class="kb-card" href="https://docs.google.com/document/d/196VfHRodAAydSQDwIlqkg3YdTJCEL_hAnq_kEJBXE8g/edit" target="_blank" rel="noopener">
+      <div class="kb-thumb grad-green">
+        <div class="kb-icon">
+          <!-- Trending chart / revenue -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 17l6-6 4 4 8-8"/>
+            <path d="M14 7h7v7"/>
+            <path d="M3 21h18" opacity="0.5"/>
+          </svg>
+        </div>
+      </div>
+      <div class="kb-body">
+        <div class="kb-tag green"><span class="kb-tag-dot"></span>Strategy</div>
+        <div class="kb-title">RevGen Strategy
+          <svg class="kb-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+        </div>
+        <div class="kb-desc">2026 revenue model, pricing, competitors, pillars.</div>
+      </div>
+    </a>
+
+    <!-- Annual Report -->
+    <a class="kb-card" href="https://drive.google.com/file/d/1IrFocCsboO6mLZsG3GAlHjmKv_V7a9Sn/view?usp=drive_link" target="_blank" rel="noopener">
+      <div class="kb-thumb grad-teal">
+        <div class="kb-icon">
+          <!-- Document with chart -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <rect x="7.5" y="12" width="2" height="6" fill="currentColor" opacity="0.3"/>
+            <rect x="11" y="10" width="2" height="8" fill="currentColor" opacity="0.3"/>
+            <rect x="14.5" y="14" width="2" height="4" fill="currentColor" opacity="0.3"/>
+          </svg>
+        </div>
+      </div>
+      <div class="kb-body">
+        <div class="kb-tag teal"><span class="kb-tag-dot"></span>Report</div>
+        <div class="kb-title">Annual Report 2025
+          <svg class="kb-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+        </div>
+        <div class="kb-desc">Year-in-review with impact, traction and financials.</div>
+      </div>
+    </a>
+
+    <!-- Pulse Summit (Unannounced) -->
+    <a class="kb-card" href="https://tparis7.github.io/Pulse-Summit/" target="_blank" rel="noopener">
+      <div class="kb-thumb grad-amber">
+        <div class="kb-icon">
+          <!-- Lightning bolt / event -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="currentColor" fill-opacity="0.25"/>
+          </svg>
+        </div>
+      </div>
+      <div class="kb-body">
+        <div class="kb-tag amber"><span class="kb-tag-dot"></span>Unannounced</div>
+        <div class="kb-title">Pulse Summit
+          <svg class="kb-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>
+        </div>
+        <div class="kb-desc">Hackathon concept — sponsor prospects only; not public yet.</div>
+      </div>
+    </a>
+
+    <!-- B2B Dashboard placeholder -->
+    <a class="kb-card disabled" href="#" rel="noopener">
+      <div class="kb-thumb grad-slate">
+        <div class="kb-icon">
+          <!-- Dashboard -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <line x1="3" y1="9" x2="21" y2="9"/>
+            <line x1="9" y1="21" x2="9" y2="9"/>
+          </svg>
+        </div>
+      </div>
+      <div class="kb-body">
+        <div class="kb-tag slate"><span class="kb-tag-dot"></span>Coming Soon</div>
+        <div class="kb-title">B2B Dashboard Sample</div>
+        <div class="kb-desc">Partner / institutional analytics preview — Phase 1 launch May 2026.</div>
+      </div>
+    </a>
+
+  </div>
+  <!--KB_END-->
+
+  <div class="footer">
+    <div class="footer-text">
+      Pulse of Perseverance Project (P3) · Confidential ·
+      <a href="https://docs.google.com/document/d/1sx4ZcXspklWNbH1SzNHtk2u9HtsODsG8eeO274Kz6Qo/edit" target="_blank">Master Doc</a> ·
+      <a href="https://www.pulseofp3.org" target="_blank">pulseofp3.org</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ===== Calendar rendering =====
+  const TODAY_ISO = "2026-04-14";
+
+  const ANN = {
+    "2026-04-15": { cls: "meeting", num: "1" },
+    "2026-04-22": { cls: "meeting", num: "2" },
+    "2026-04-29": { cls: "meeting", num: "3" },
+    "2026-05-06": { cls: "meeting", num: "4" },
+    "2026-05-13": { cls: "meeting", num: "5" },
+    "2026-05-20": { cls: "meeting", num: "6" },
+    "2026-05-27": { cls: "meeting", num: "7" },
+    "2026-06-03": { cls: "meeting", num: "8" },
+    "2026-04-30": { cls: "invoice" },
+    "2026-05-31": { cls: "invoice" },
+  };
+
+  const PHASES = [
+    { start: "2026-04-13", end: "2026-04-26", cls: "p1" },
+    { start: "2026-04-27", end: "2026-05-10", cls: "p2" },
+    { start: "2026-05-04", end: "2026-05-24", cls: "p3" },
+    { start: "2026-05-25", end: "2026-06-26", cls: "p4" },
+  ];
+
+  // Session weeks: pitch/practice sessions per master doc deliverables tracker
+  const SESSION_WEEKS = [
+    { start: "2026-05-04", end: "2026-05-10", cls: "session-practice" }, // Practice Pitch #1 — Week of May 4
+    { start: "2026-05-11", end: "2026-05-17", cls: "session-practice" }, // Practice Pitch #2 — Week of May 11
+    { start: "2026-05-18", end: "2026-05-24", cls: "session-pitch" },    // Live Pitches #1–3 — Week of May 18–24
+  ];
+  function sessionFor(iso) {
+    for (const s of SESSION_WEEKS) if (iso >= s.start && iso <= s.end) return s.cls;
+    return null;
+  }
+
+  function isoFor(y, m, d) {
+    return `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+  }
+  function phaseFor(iso) {
+    let hit = null;
+    for (const p of PHASES) if (iso >= p.start && iso <= p.end) hit = p;
+    return hit ? hit.cls : null;
+  }
+  function renderMonth(elId, year, month) {
+    const el = document.getElementById(elId);
+    const dows = ["S","M","T","W","T","F","S"];
+    let html = "";
+    dows.forEach(d => html += `<div class="cal-dow">${d}</div>`);
+    const startDow = new Date(year, month, 1).getDay();
+    const daysIn = new Date(year, month+1, 0).getDate();
+    for (let i = 0; i < startDow; i++) html += `<div class="cal-day muted"></div>`;
+    for (let d = 1; d <= daysIn; d++) {
+      const iso = isoFor(year, month, d);
+      const ann = ANN[iso];
+      const classes = ["cal-day"];
+      let extra = "";
+      const dow = new Date(year, month, d).getDay();
+      const isWeekend = (dow === 0 || dow === 6);
+      if (ann) {
+        classes.push(ann.cls);
+        if (ann.num) extra = `<span class="mnum">${ann.num}</span>`;
+      } else if (isWeekend) {
+        classes.push("weekend");
+      }
+      // Session-week ring applies only on weekdays (not meeting/invoice/weekend)
+      if (!ann && !isWeekend) {
+        const s = sessionFor(iso);
+        if (s) classes.push(s);
+      }
+      html += `<div class="${classes.join(" ")}">${extra}<span>${d}</span></div>`;
+    }
+    el.innerHTML = html;
+  }
+  renderMonth("cal-apr", 2026, 3);
+  renderMonth("cal-may", 2026, 4);
+  renderMonth("cal-jun", 2026, 5);
+</script>
+
+</body>
+</html>
